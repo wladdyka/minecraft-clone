@@ -14,21 +14,24 @@ public:
     Window();
     Window(GLint windowWidth, GLint windowHeight);
     ~Window();
-
     int Init();
-
     GLfloat aspectRation() const;
-
     bool getShouldClose() { return glfwWindowShouldClose(mainWindow); }
     void swapBuffers() { glfwSwapBuffers(mainWindow); }
+    bool* getKeys() { return keys; }
+    GLfloat getMouseChangeX();
+    GLfloat getMouseChangeY();
 
 private:
     GLint width, height;
     GLint bufferWidth{}, bufferHeight{};
     GLFWwindow* mainWindow{};
     bool keys[1024]{};
+    bool mouseMovementInitialized = true;
+    GLfloat mouseLastX{}, mouseLastY{}, mouseChangeX{}, mouseChangeY{};
     void createCallbacks();
     static void handleKeys(GLFWwindow* window, int key, int code, int action, int mode);
+    static void handleMouse(GLFWwindow* window, double positionX, double positionY);
 };
 
 

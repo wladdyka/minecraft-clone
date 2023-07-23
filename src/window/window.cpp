@@ -35,6 +35,7 @@ int Window::Init() {
     glewExperimental = GL_TRUE;
 
     createCallbacks();
+    glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (glewInit() != GLEW_OK) {
         printf("GLEW initialization failed!");
@@ -83,4 +84,36 @@ void Window::handleKeys(GLFWwindow *window, int key, int code, int action, int m
 
 void Window::createCallbacks() {
     glfwSetKeyCallback(mainWindow, handleKeys);
+    glfwSetCursorPosCallback(mainWindow, handleMouse);
+}
+
+void Window::handleMouse(GLFWwindow *window, double positionX, double positionY) {
+    auto* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    if (theWindow->mouseMovementInitialized) {
+        theWindow->mouseLastX = positionX;
+        theWindow->mouseLastY = positionY;
+        theWindow->mouseMovementInitialized = false;
+    }
+
+    theWindow->mouseChangeX = positionX - theWindow->mouseLastX;
+    theWindow->mouseChangeY = theWindow->mouseLastY - positionY;
+
+    theWindow->mouseLastX = positionX;
+    theWindow->mouseLastY = positionY;
+
+    printf("x:%.6f, y:%.6f\n", theWindow->mouseChangeX, theWindow->mouseChangeY);;
+}
+
+GLfloat Window::getMouseChangeX() {
+    GLfloat change = mouseChangeX;
+    mouseChangeX = 0;
+
+    return change;
+}
+
+GLfloat Window::getMouseChangeY() {
+    GLfloat change = mouseChangeY;
+    mouseChangeY = 0;
+
+    return change;
 }
