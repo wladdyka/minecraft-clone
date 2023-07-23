@@ -32,21 +32,23 @@ void Camera::update() {
 
 Camera::~Camera() = default;
 
-void Camera::keyControl(bool* keys) {
+void Camera::keyControl(bool* keys, GLfloat deltaTime) {
+    GLfloat velocity = movementSpeed * deltaTime;
+
     if (keys[GLFW_KEY_W]) {
-        position += front * movementSpeed;
+        position += front * velocity;
     }
 
     if (keys[GLFW_KEY_S]) {
-        position -= front * movementSpeed;
+        position -= front * velocity;
     }
 
     if (keys[GLFW_KEY_A]) {
-        position -= right * movementSpeed;
+        position -= right * velocity;
     }
 
     if (keys[GLFW_KEY_D]) {
-        position += right * movementSpeed;
+        position += right * velocity;
     }
 }
 

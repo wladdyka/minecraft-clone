@@ -17,6 +17,9 @@ std::vector<Mesh*> meshList;
 std::vector<Shader*> shaderList;
 Camera* camera;
 
+GLfloat deltaTime = 0.0f;
+GLfloat lastTime = 0.0f;
+
 void CreateShader() {
     auto* shader1 = new Shader();
     shader1->CreateFromFile("shaders/shader.vertex", "shaders/shader.fragment");
@@ -53,14 +56,18 @@ int main() {
 
     CreateObjects();
     CreateShader();
-    camera = new Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 0.001f, 1.0f);
+    camera = new Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 5.0f, 1.0f);
 
     GLuint uniformModelId, uniformProjectionId, uniformView;
     glm::mat4 projection = glm::perspective(45.0f, mainWindow->aspectRation(), 0.1f, 100.0f);
 
     while(!mainWindow->getShouldClose()) {
+        GLfloat now = glfwGetTime();
+        deltaTime = now - lastTime;
+        lastTime = now;
+
         glfwPollEvents();
-        camera->keyControl(mainWindow->getKeys());
+        camera->keyControl(mainWindow->getKeys(), deltaTime);
 
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
