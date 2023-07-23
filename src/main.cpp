@@ -9,11 +9,13 @@
 #include "mesh/mesh.h"
 #include "shader/shader.h"
 #include "window/window.h"
+#include "camera/camera.h"
 
 const float toRadians = 3.14159265f / 180.0f;
 
 std::vector<Mesh*> meshList;
 std::vector<Shader*> shaderList;
+Camera* camera;
 
 void CreateShader() {
     auto* shader1 = new Shader();
@@ -51,12 +53,14 @@ int main() {
 
     CreateObjects();
     CreateShader();
+    camera = new Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 0.001f, 1.0f);
 
-    GLuint uniformModelId, uniformProjectionId;
+    GLuint uniformModelId, uniformProjectionId, uniformView;
     glm::mat4 projection = glm::perspective(45.0f, mainWindow->aspectRation(), 0.1f, 100.0f);
 
     while(!mainWindow->getShouldClose()) {
         glfwPollEvents();
+        camera->keyControl(mainWindow->getKeys());
 
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -64,6 +68,7 @@ int main() {
         shaderList[0]->UseShader();
         uniformModelId = shaderList[0]->GetModelLocation();
         uniformProjectionId = shaderList[0]->GetProjectionLocation();
+        uniformView = shaderList[0]->GetViewLocation();
 
         glm::mat4 model(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f));
@@ -72,6 +77,7 @@ int main() {
 
         glUniformMatrix4fv(uniformModelId, 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(uniformProjectionId, 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera->calculateViewMatrix()));
 
         meshList[0]->RenderMesh();
 
