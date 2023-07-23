@@ -1,5 +1,4 @@
 #include <cstdio>
-#include <cstring>
 #include <cmath>
 #include <vector>
 
@@ -11,8 +10,8 @@
 
 #include "mesh/mesh.h"
 #include "shader/shader.h"
+#include "window/window.h"
 
-const GLint WIDTH = 1920, HEIGHT = 1080;
 const float toRadians = 3.14159265f / 180.0f;
 
 std::vector<Mesh*> meshList;
@@ -55,46 +54,16 @@ void CreateObjects() {
 }
 
 int main() {
-    if (!glfwInit()) {
-        printf("Failed to initialize GLFW");
-        glfwTerminate();
-        return 1;
-    }
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
-    GLFWwindow* mainWindow = glfwCreateWindow(WIDTH, HEIGHT, "Test Window", nullptr, nullptr);
-    if (!mainWindow) {
-        printf("GLFW window creation failed!");
-        glfwTerminate();
-        return 1;
-    }
-
-    int bufferWidth, bufferHeight;
-    glfwGetFramebufferSize(mainWindow, &bufferWidth, &bufferHeight);
-    glfwMakeContextCurrent(mainWindow);
-    glewExperimental = GL_TRUE;
-
-    if (glewInit() != GLEW_OK) {
-        printf("GLEW initialization failed!");
-        glfwDestroyWindow(mainWindow);
-        glfwTerminate();
-        return 1;
-    }
-
-    glEnable(GL_DEPTH_TEST);
-    glViewport(0, 0, bufferWidth, bufferHeight);
+    auto* mainWindow = new Window(1920, 1080);
+    mainWindow->Init();
 
     CreateObjects();
     CreateShader();
 
     GLuint uniformModelId, uniformProjectionId;
-    glm::mat4 projection = glm::perspective(45.0f, (GLfloat)bufferWidth / (GLfloat)bufferHeight, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(45.0f, mainWindow->aspectRation(), 0.1f, 100.0f);
 
-    while(!glfwWindowShouldClose(mainWindow)) {
+    while(!mainWindow->getShouldClose()) {
         glfwPollEvents();
 
         if (directionRight) {
@@ -137,7 +106,7 @@ int main() {
 
         glUseProgram(0);
 
-        glfwSwapBuffers(mainWindow);
+        mainWindow->swapBuffers();
     }
 
     return 0;
