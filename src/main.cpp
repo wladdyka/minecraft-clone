@@ -1,5 +1,3 @@
-#include <cstdio>
-#include <cmath>
 #include <vector>
 
 #include <GL/glew.h>
@@ -16,12 +14,6 @@ const float toRadians = 3.14159265f / 180.0f;
 
 std::vector<Mesh*> meshList;
 std::vector<Shader*> shaderList;
-
-bool directionRight = true;
-float triangleOffset = 0.0f;
-float triangleMaxOffset = 0.7f;
-float triangleOffsetIncrement = 0.0005f;
-float currentAngle = 0.0f;
 
 void CreateShader() {
     auto* shader1 = new Shader();
@@ -66,21 +58,6 @@ int main() {
     while(!mainWindow->getShouldClose()) {
         glfwPollEvents();
 
-        if (directionRight) {
-            triangleOffset += triangleOffsetIncrement;
-        } else {
-            triangleOffset -= triangleOffsetIncrement;
-        }
-
-        currentAngle += 0.01f;
-        if (currentAngle >= 360) {
-            currentAngle -= 360;
-        }
-
-        if (std::abs(triangleOffset) >= triangleMaxOffset) {
-            directionRight = !directionRight;
-        }
-
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -90,7 +67,7 @@ int main() {
 
         glm::mat4 model(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f));
-        model = glm::rotate(model, currentAngle * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+        //model = glm::rotate(model, currentAngle * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
         //model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 
         glUniformMatrix4fv(uniformModelId, 1, GL_FALSE, glm::value_ptr(model));
@@ -100,7 +77,7 @@ int main() {
 
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(2.0f, 2.0f, -5.0f));
-        model = glm::rotate(model, currentAngle * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+        //model = glm::rotate(model, currentAngle * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
         glUniformMatrix4fv(uniformModelId, 1, GL_FALSE, glm::value_ptr(model));
         meshList[1]->RenderMesh();
 
