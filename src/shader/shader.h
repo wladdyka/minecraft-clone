@@ -20,6 +20,7 @@ public:
 
     std::string ReadFile(const char* filePath);
 
+    GLuint GetId() { return shaderId; };
     GLuint GetProjectionLocation();
     GLuint GetModelLocation();
     GLuint GetViewLocation();

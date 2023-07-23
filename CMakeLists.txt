@@ -11,16 +11,24 @@ project(${PROJECT_NAME})
 find_package(GLEW REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(freetype-gl CONFIG REQUIRED)
 
-add_executable(${PROJECT_NAME} src/main.cpp src/mesh/mesh.cpp src/mesh/mesh.h src/shader/shader.cpp src/shader/shader.h src/window/window.cpp src/window/window.h src/camera/camera.cpp src/camera/camera.h)
+
+add_executable(${PROJECT_NAME} src/main.cpp src/mesh/mesh.cpp src/mesh/mesh.h src/shader/shader.cpp src/shader/shader.h src/window/window.cpp src/window/window.h src/camera/camera.cpp src/camera/camera.h src/text/text.cpp src/text/text.h)
 
 # linking dependencies
 target_link_libraries(${PROJECT_NAME} PRIVATE GLEW::GLEW)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm)
+target_link_libraries(${PROJECT_NAME} PRIVATE freetype-gl)
 
 # post build copying of essential files
 add_custom_command(TARGET ${PROJECT_NAME}  POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/shaders
         ${CMAKE_CURRENT_BINARY_DIR}/shaders)
+
+add_custom_command(TARGET ${PROJECT_NAME}  POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/fonts
+        ${CMAKE_CURRENT_BINARY_DIR}/fonts)

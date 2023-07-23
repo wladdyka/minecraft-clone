@@ -45,6 +45,10 @@ int Window::Init() {
     }
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     glViewport(0, 0, bufferWidth, bufferHeight);
     glfwSetWindowUserPointer(mainWindow, this);
 
@@ -101,7 +105,7 @@ void Window::handleMouse(GLFWwindow *window, double positionX, double positionY)
     theWindow->mouseLastX = positionX;
     theWindow->mouseLastY = positionY;
 
-    printf("x:%.6f, y:%.6f\n", theWindow->mouseChangeX, theWindow->mouseChangeY);;
+    // printf("x:%.6f, y:%.6f\n", theWindow->mouseChangeX, theWindow->mouseChangeY);;
 }
 
 GLfloat Window::getMouseChangeX() {

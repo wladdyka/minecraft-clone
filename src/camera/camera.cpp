@@ -15,6 +15,10 @@ Camera::Camera(glm::vec3 startPosition, glm::vec3 startWorldUp, GLfloat startYaw
     yaw = startYaw;
     pitch = startPitch;
     front = glm::vec3(0.0f, 0.0f, -1.0f);
+
+    right = glm::normalize(glm::cross(front, worldUp));
+    up = glm::normalize(glm::cross(right, front));
+
     movementSpeed = startMoveSpeed;
     turnSpeed = startTurnSpeed;
     update();
@@ -54,6 +58,21 @@ void Camera::keyControl(bool* keys, GLfloat deltaTime) {
 
 glm::mat4 Camera::calculateViewMatrix() {
     return glm::lookAt(position, position + front, up);
+}
+
+void Camera::mouseControl(GLfloat changeX, GLfloat changeY) {
+    yaw += changeX * turnSpeed;
+    pitch += changeY * turnSpeed;
+
+    if (pitch > 89.0f) {
+        pitch = 89.0f;
+    }
+
+    if (pitch < -89.0f) {
+        pitch = -89.0f;
+    }
+
+    update();
 }
 
 Camera::Camera() = default;

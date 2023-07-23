@@ -14,6 +14,7 @@ public:
     Camera();
     Camera(glm::vec3 position, glm::vec3 up, GLfloat yaw, GLfloat pitch, GLfloat moveSpeed, GLfloat turnSpeed);
     void keyControl(bool* keys, GLfloat deltaTime);
+    void mouseControl(GLfloat changeX, GLfloat changeY);
     glm::mat4 calculateViewMatrix();
     ~Camera();
 private:
