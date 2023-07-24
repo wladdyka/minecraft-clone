@@ -1,0 +1,24 @@
+//
+// Created by wladdyka on 7/24/2023.
+//
+
+#ifndef OPENGLCOURSE_LIGHT_H
+#define OPENGLCOURSE_LIGHT_H
+
+
+#include <glm/vec3.hpp>
+#include <GL/glew.h>
+
+class Light {
+public:
+    Light();
+    Light(glm::vec3 colour, GLfloat intensity);
+    void UseLight(GLfloat ambientIntensityLocation, GLfloat ambientColourLocation);
+    ~Light();
+private:
+    glm::vec3 colour{};
+    GLfloat ambientIntensity{};
+};
+
+
+#endif //OPENGLCOURSE_LIGHT_H

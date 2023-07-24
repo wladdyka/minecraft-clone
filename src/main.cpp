@@ -13,6 +13,7 @@
 #include "camera/camera.h"
 #include "text/text.h"
 #include "texture/texture.h"
+#include "light/light.h"
 
 const float toRadians = 3.14159265f / 180.0f;
 
@@ -22,6 +23,8 @@ Camera* camera;
 
 Texture brickTexture;
 Texture dirtTexture;
+
+Light mainLight;
 
 GLfloat deltaTime = 0.0f;
 GLfloat lastTime = 0.0f;
@@ -81,7 +84,9 @@ int main() {
     dirtTexture = Texture(dirtTexturePath.c_str());
     dirtTexture.LoadTexture();
 
-    GLuint uniformModelId, uniformProjectionId, uniformView;
+    mainLight = Light(glm::vec3(1.0f, 1.0f, 1.0f), 0.2f);
+
+    GLuint uniformModelId, uniformProjectionId, uniformView, uniformAmbientIntensity, uniformAmbientColour;
     glm::mat4 projection = glm::perspective(45.0f, mainWindow->aspectRation(), 0.1f, 100.0f);
     glm::mat4 textProjection = glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
 
@@ -101,6 +106,10 @@ int main() {
         uniformModelId = shaderList[0]->GetModelLocation();
         uniformProjectionId = shaderList[0]->GetProjectionLocation();
         uniformView = shaderList[0]->GetViewLocation();
+        uniformAmbientIntensity = shaderList[0]->GetAmbientIntensityLocation();
+        uniformAmbientColour = shaderList[0]->GetAmbientColourLocation();
+
+        mainLight.UseLight(uniformAmbientIntensity, uniformAmbientColour);
 
         glm::mat4 model(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f));

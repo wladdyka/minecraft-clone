@@ -14,7 +14,7 @@ find_package(glm CONFIG REQUIRED)
 find_package(freetype-gl CONFIG REQUIRED)
 find_package(Stb REQUIRED)
 
-add_executable(${PROJECT_NAME} src/main.cpp src/mesh/mesh.cpp src/mesh/mesh.h src/shader/shader.cpp src/shader/shader.h src/window/window.cpp src/window/window.h src/camera/camera.cpp src/camera/camera.h src/text/text.cpp src/text/text.h src/texture/texture.cpp src/texture/texture.h)
+add_executable(${PROJECT_NAME} src/main.cpp src/mesh/mesh.cpp src/mesh/mesh.h src/shader/shader.cpp src/shader/shader.h src/window/window.cpp src/window/window.h src/camera/camera.cpp src/camera/camera.h src/text/text.cpp src/text/text.h src/texture/texture.cpp src/texture/texture.h src/light/light.cpp src/light/light.h)
 
 # linking dependencies
 target_link_libraries(${PROJECT_NAME} PRIVATE GLEW::GLEW)
