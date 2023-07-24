@@ -110,7 +110,7 @@ int main() {
         /* drawing text on screen */
         shaderList[1]->UseShader();
         glUniformMatrix4fv(glGetUniformLocation(shaderList[1]->GetId(), "projection"), 1, GL_FALSE, glm::value_ptr(textProjection));
-        textSystem->RenderText(shaderList[1]->GetId(), "freetype text!", 1.0f, 1.0f, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        textSystem->RenderText(shaderList[1]->GetId(), "freetype text!", 100.0f, 1.0f, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 
         glUseProgram(0);
 
