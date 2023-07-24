@@ -17,6 +17,7 @@ public:
     void CreateFromFile(const char* vertexCode, const char* fragmentCode);
     void UseShader();
     void ClearShader();
+    bool useTransparentBlending = false;
 
     std::string ReadFile(const char* filePath);
 
@@ -26,9 +27,12 @@ public:
     GLuint GetViewLocation();
     GLuint GetAmbientIntensityLocation();
     GLuint GetAmbientColourLocation();
+    GLuint GetDiffuseIntensityLocation();
+    GLuint GetDirectionLocation();
 
 private:
-    GLuint shaderId{}, uniformProjection{}, uniformView{}, uniformModel{}, uniformAmbientIntensity{}, uniformAmbientColour{};
+    GLuint shaderId{}, uniformProjection{}, uniformView{}, uniformModel{}, uniformAmbientIntensity{},
+        uniformAmbientColour{}, uniformDiffuseIntensity{}, uniformDirection{};
     void CompileShader(const char* vertexCode, const char* fragmentCode);
     void AddShader(GLuint programId, const char* programCode, GLenum shaderType, const char* shaderName);
 };
