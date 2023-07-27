@@ -45,7 +45,6 @@ int Window::Init() {
     }
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
 
     glViewport(0, 0, bufferWidth, bufferHeight);
     glfwSetWindowUserPointer(mainWindow, this);
