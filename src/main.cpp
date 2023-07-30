@@ -15,6 +15,7 @@
 #include "texture/texture.h"
 #include "light/light.h"
 #include "material/material.h"
+#include "light/directional-light.h"
 
 const float toRadians = 3.14159265f / 180.0f;
 
@@ -25,7 +26,7 @@ Camera* camera;
 Texture brickTexture;
 Texture dirtTexture;
 
-Light mainLight;
+DirectionalLight mainLight;
 
 Material shinyMaterial;
 Material dullMaterial;
@@ -121,8 +122,7 @@ int main() {
     shinyMaterial = Material(1.0f, 32);
     dullMaterial = Material(0.3f, 4);
 
-    mainLight = Light(glm::vec3(1.0f, 1.0f, 1.0f), 0.2f,
-                      glm::vec3(2.0f, -1.0f, -2.0f), 0.3f);
+    mainLight = DirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.3f,glm::vec3(2.0f, -1.0f, -2.0f));
 
     GLuint uniformModelId{}, uniformProjectionId{}, uniformView{}, uniformAmbientIntensity{},
         uniformAmbientColour{}, uniformDirection{}, uniformDiffuseIntensity{}, uniformEyePosition{},
