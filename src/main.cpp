@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <assimp/importer.hpp>
 
 #include "mesh/mesh.h"
 #include "shader/shader.h"
@@ -133,15 +134,15 @@ int main() {
 
     std::string brickTexturePath = "textures/brick.png";
     brickTexture = Texture(brickTexturePath.c_str());
-    brickTexture.LoadTexture();
+    brickTexture.LoadTextureAlpha();
 
     std::string dirtTexturePath = "textures/dirt.png";
     dirtTexture = Texture(dirtTexturePath.c_str());
-    dirtTexture.LoadTexture();
+    dirtTexture.LoadTextureAlpha();
 
     std::string plainTexturePath = "textures/plain.png";
     plainTexture = Texture(plainTexturePath.c_str());
-    plainTexture.LoadTexture();
+    plainTexture.LoadTextureAlpha();
 
     shinyMaterial = Material(1.0f, 32);
     dullMaterial = Material(0.3f, 4);

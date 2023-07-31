@@ -26,11 +26,38 @@ void Texture::ClearTexture() {
     filePath = {};
 }
 
-void Texture::LoadTexture() {
+bool Texture::LoadTexture() {
     unsigned char* textureData = stbi_load(filePath, &width, &height, &bitDepth, 0);
     if (!textureData) {
         printf("Failed to find: %s\n", filePath);
-        return;
+        return false;
+    }
+
+    glGenTextures(1, &textureId);
+    glBindTexture(GL_TEXTURE_2D, textureId);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    stbi_image_free(textureData);
+
+    return true;
+}
+
+Texture::~Texture() {
+    ClearTexture();
+}
+
+bool Texture::LoadTextureAlpha() {
+    unsigned char* textureData = stbi_load(filePath, &width, &height, &bitDepth, 0);
+    if (!textureData) {
+        printf("Failed to find: %s\n", filePath);
+        return false;
     }
 
     glGenTextures(1, &textureId);
@@ -45,8 +72,6 @@ void Texture::LoadTexture() {
 
     glBindTexture(GL_TEXTURE_2D, 0);
     stbi_image_free(textureData);
-}
 
-Texture::~Texture() {
-    ClearTexture();
+    return true;
 };

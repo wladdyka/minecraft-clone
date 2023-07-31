@@ -12,7 +12,8 @@ class Texture {
 public:
     Texture();
     Texture(const char *filePath);
-    void LoadTexture();
+    bool LoadTexture();
+    bool LoadTextureAlpha();
     void UseTexture();
     void ClearTexture();
     ~Texture();
