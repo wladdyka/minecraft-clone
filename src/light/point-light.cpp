@@ -22,11 +22,11 @@ PointLight::PointLight(glm::vec3 colour, GLfloat intensity, GLfloat diffuseInten
 }
 
 void
-PointLight::UseLight(GLfloat ambientIntensityLocation, GLfloat ambientColourLocation, GLfloat diffuseIntensityLocation,
-                     GLfloat positionLocation, GLfloat constantLocation, GLfloat linearLocation,
-                     GLfloat exponentLocation) {
-    glUniform3f(ambientColourLocation, colour.x, colour.y, colour.z);
+PointLight::UseLight(GLuint ambientIntensityLocation, GLuint ambientColourLocation, GLuint diffuseIntensityLocation,
+                     GLuint positionLocation, GLuint constantLocation, GLuint linearLocation,
+                     GLuint exponentLocation) {
     glUniform1f(ambientIntensityLocation, ambientIntensity);
+    glUniform3f(ambientColourLocation, colour.x, colour.y, colour.z);
     glUniform1f(diffuseIntensityLocation, diffuseIntensity);
     glUniform3f(positionLocation, position.x, position.y, position.z);
     glUniform1f(constantLocation, constant);

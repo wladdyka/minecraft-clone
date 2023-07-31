@@ -12,6 +12,7 @@
 #include "../light/directional-light.h"
 #include "../shared/common-values.h"
 #include "../light/point-light.h"
+#include "../light/spot-light.h"
 
 class Shader {
 public:
@@ -34,10 +35,10 @@ public:
     GLuint GetEyePositionLocation();
 
     void SetDirectionalLight(DirectionalLight *light);
-    void SetPointLight(PointLight *light, unsigned int lightCount);
+    void SetPointLights(PointLight *light, unsigned int lightCount);
+    void SetSpotLights(SpotLight *light, unsigned int lightCount);
 
 private:
-    int pointLightCount{};
     GLuint shaderId{}, uniformProjection{}, uniformView{}, uniformModel{}, uniformEyePosition{},
         uniformSpecularIntensity{}, uniformSpecularShininess{};
 
@@ -60,6 +61,21 @@ private:
         GLuint uniformLinear;
         GLuint uniformExponent;
     } uniformPointLight[MAX_POINT_LIGHTS];
+
+    GLuint uniformSpotLightCount {};
+    struct {
+        GLuint uniformColour;
+        GLuint uniformAmbientIntensity;
+        GLuint uniformDiffuseIntensity;
+
+        GLuint uniformPosition;
+        GLuint uniformConstant;
+        GLuint uniformLinear;
+        GLuint uniformExponent;
+
+        GLuint uniformDirection;
+        GLuint uniformEdge;
+    } uniformSpotLight[MAX_SPOT_LIGHTS];
 
     void CompileShader(const char* vertexCode, const char* fragmentCode);
     void AddShader(GLuint programId, const char* programCode, GLenum shaderType, const char* shaderName);

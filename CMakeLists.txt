@@ -14,7 +14,7 @@ find_package(glm CONFIG REQUIRED)
 find_package(freetype-gl CONFIG REQUIRED)
 find_package(Stb REQUIRED)
 
-add_executable(${PROJECT_NAME} src/main.cpp src/mesh/mesh.cpp src/mesh/mesh.h src/shader/shader.cpp src/shader/shader.h src/window/window.cpp src/window/window.h src/camera/camera.cpp src/camera/camera.h src/text/text.cpp src/text/text.h src/texture/texture.cpp src/texture/texture.h src/light/light.cpp src/light/light.h src/material/material.cpp src/material/material.h src/light/directional-light.cpp src/light/directional-light.h src/light/point-light.cpp src/light/point-light.h src/shared/common-values.h)
+add_executable(${PROJECT_NAME} src/main.cpp src/mesh/mesh.cpp src/mesh/mesh.h src/shader/shader.cpp src/shader/shader.h src/window/window.cpp src/window/window.h src/camera/camera.cpp src/camera/camera.h src/text/text.cpp src/text/text.h src/texture/texture.cpp src/texture/texture.h src/light/light.cpp src/light/light.h src/material/material.cpp src/material/material.h src/light/directional-light.cpp src/light/directional-light.h src/light/point-light.cpp src/light/point-light.h src/shared/common-values.h src/light/spot-light.cpp src/light/spot-light.h)
 
 # linking dependencies
 target_link_libraries(${PROJECT_NAME} PRIVATE GLEW::GLEW)
