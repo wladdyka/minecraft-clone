@@ -18,6 +18,7 @@
 #include "material/material.h"
 #include "light/directional-light.h"
 #include "light/spot-light.h"
+#include "model/model.h"
 
 const float toRadians = 3.14159265f / 180.0f;
 
@@ -35,6 +36,8 @@ SpotLight spotLights[MAX_SPOT_LIGHTS];
 
 Material shinyMaterial;
 Material dullMaterial;
+
+Model xwing;
 
 GLfloat deltaTime = 0.0f;
 GLfloat lastTime = 0.0f;
@@ -147,9 +150,12 @@ int main() {
     shinyMaterial = Material(1.0f, 32);
     dullMaterial = Material(0.3f, 4);
 
-    mainLight = DirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.1f,glm::vec3(9.0f, -1.0f, -9.0f));
+    xwing = Model();
+    xwing.LoadModel("Models/x-wing.obj");
 
-    unsigned int pointLightCount = 0;
+    mainLight = DirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.6f,glm::vec3(9.0f, -1.0f, -9.0f));
+
+    unsigned int pointLightCount = 2;
     pointLights[0] = PointLight(glm::vec3(0.0f, 0.0f, 1.0f), 0.1f, 0.1f, glm::vec3(4.0f, 0.0f, 0.0f), 0.3f, 0.2f, 0.1f);
     pointLights[1] = PointLight(glm::vec3(0.0f, 1.0f, 0.0f), 0.1f, 0.1f, glm::vec3(-4.0f, 0.0f, 0.0f), 0.3f, 0.2f, 0.1f);
 
@@ -220,6 +226,13 @@ int main() {
         plainTexture.UseTexture();
         dullMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
         meshList[2]->RenderMesh();
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-7.0f, 3.0f, 10.0f));
+        model = glm::scale(model, glm::vec3(0.007f, 0.007f, 0.007f));
+        glUniformMatrix4fv(uniformModelId, 1, GL_FALSE, glm::value_ptr(model));
+        dullMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
+        xwing.RenderModel();
 
         glUseProgram(0);
 

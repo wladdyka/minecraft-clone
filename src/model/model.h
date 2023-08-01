@@ -20,7 +20,7 @@ public:
     Model();
     ~Model();
 
-    void LoadModal(const std::string &fileName);
+    void LoadModel(const std::string &fileName);
     void RenderModel();
     void ClearModel();
 private:
