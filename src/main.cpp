@@ -14,10 +14,8 @@
 #include "camera/camera.h"
 #include "text/text.h"
 #include "texture/texture.h"
-#include "light/light.h"
 #include "material/material.h"
 #include "light/directional-light.h"
-#include "light/spot-light.h"
 #include "model/model.h"
 
 const float toRadians = 3.14159265f / 180.0f;
@@ -31,8 +29,6 @@ Texture dirtTexture;
 Texture plainTexture;
 
 DirectionalLight mainLight;
-PointLight pointLights[MAX_POINT_LIGHTS];
-SpotLight spotLights[MAX_SPOT_LIGHTS];
 
 Material shinyMaterial;
 Material dullMaterial;
@@ -147,25 +143,15 @@ int main() {
     plainTexture = Texture(plainTexturePath.c_str());
     plainTexture.LoadTextureAlpha();
 
+    /*
     shinyMaterial = Material(1.0f, 32);
     dullMaterial = Material(0.3f, 4);
 
     xwing = Model();
     xwing.LoadModel("Models/x-wing.obj");
+    */
 
     mainLight = DirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.6f,glm::vec3(9.0f, -1.0f, -9.0f));
-
-    unsigned int pointLightCount = 2;
-    pointLights[0] = PointLight(glm::vec3(0.0f, 0.0f, 1.0f), 0.1f, 0.1f, glm::vec3(4.0f, 0.0f, 0.0f), 0.3f, 0.2f, 0.1f);
-    pointLights[1] = PointLight(glm::vec3(0.0f, 1.0f, 0.0f), 0.1f, 0.1f, glm::vec3(-4.0f, 0.0f, 0.0f), 0.3f, 0.2f, 0.1f);
-
-    unsigned int spotLightCount = 1;
-    spotLights[0] = SpotLight(
-            glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.2f,
-            glm::vec3(0.0f, 1.5f, 0.0f),
-            glm::vec3(0.0f, -1.0f, 0.0f),
-            1.0f, 0.0f, 0.0f, 20.0f
-    );
 
     GLuint uniformModelId{}, uniformProjectionId{}, uniformView{}, uniformEyePosition{},
         uniformSpecularIntensity{}, uniformShininess{};
@@ -195,11 +181,8 @@ int main() {
 
         glm::vec3 lowerLight = camera->getCameraPosition();
         lowerLight.y -= 0.3f;
-        spotLights[0].SetFlashlight(lowerLight, camera->getCameraDirection());
 
         shaderList[0]->SetDirectionalLight(&mainLight);
-        shaderList[0]->SetPointLights(pointLights, pointLightCount);
-        shaderList[0]->SetSpotLights(spotLights, spotLightCount);
 
         glUniformMatrix4fv(uniformProjectionId, 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera->calculateViewMatrix()));
