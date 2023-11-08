@@ -7,6 +7,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <assimp/importer.hpp>
+#include <array>
+#include <stdexcept>
 
 #include "mesh/mesh.h"
 #include "shader/shader.h"
@@ -76,48 +78,207 @@ void CalculateAverageNormals(unsigned int * indices, unsigned int indiceCount, G
     }
 }
 
-void CreateObjects() {
-    unsigned int indices[] = {
-           0, 3, 1,
-           1, 3, 2,
-           2, 3, 0,
-           0, 1, 2
-    };
+void DrawChunk() {
+    constexpr int chunkSizeX = 3;
+    constexpr int chunkSizeY = 3;
+    constexpr int chunkSizeZ = 3;
 
-    GLfloat vertices[] = {
-            //	  x           y          z			     u	        v			     nx	        ny       nz
-            -1.0f, -1.0f, -0.6f,		0.0f, 0.0f,		0.0f, 0.0f, 0.0f,
-            0.0f, -1.0f, 1.0f,		0.5f, 0.0f,		0.0f, 0.0f, 0.0f,
-            1.0f, -1.0f, -0.6f,		1.0f, 0.0f,		0.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f,		0.5f, 1.0f,		0.0f, 0.0f, 0.0f
-    };
+    std::array<std::array<std::array<unsigned int, chunkSizeZ>, chunkSizeY>, chunkSizeX> blocks = {};
 
-    unsigned int floorIndices[] = {
-            0, 2, 1,
-            1, 2, 3
-    };
+    std::vector<unsigned int> indices = {};
+    std::vector<GLfloat> vertices = {};
 
-    GLfloat floorVertices[] = {
-            -10.0f, 0.0f, -10.0f,      0.0f, 0.0f,           0.0f,-1.0f, 0.0f,
-            10.0f, 0.0f, -10.0f,      10.0f, 0.0f,        0.0f,-1.0f, 0.0f,
-            -10.0f, 0.0f, 10.0f,    0.0f, 10.0f,        0.0f,-1.0f, 0.0f,
-            10.0f, 0.0f, 10.0f,    10.0f, 10.0f,       0.0f,-1.0f, 0.0f
-    };
+    int waterLevel = 3;
+    // set block type here
+    for (unsigned int x = 0; x < chunkSizeX; x++) {
+        // waterLevel--;
+        for (unsigned int y = 0; y < chunkSizeY; y++) {
+            for (unsigned int z = 0; z < chunkSizeZ; z++) {
+                blocks.at(x).at(y).at(z) = y <= waterLevel ? 1 : 0;
+            }
+        }
+    }
 
-    CalculateAverageNormals(indices, 12, vertices, 32, 8, 5);
+    // figure out what vertices to add to a mesh
+    unsigned int vertexProcessed = 0;
 
-    Mesh *object1 = new Mesh();
-    object1->CreateMesh(vertices, indices, 32, 12);
-    meshList.push_back(object1);
+    for (unsigned int x = 0; x < chunkSizeX; x++) {
+        for (unsigned int y = 0; y < chunkSizeY; y++) {
+            for (unsigned int z = 0; z < chunkSizeZ; z++) {
+                auto blockX = (GLfloat)x;
+                auto blockY = (GLfloat)y;
+                auto blockZ = (GLfloat)z;
 
-    Mesh *object2 = new Mesh();
-    object2->CreateMesh(vertices, indices, 32, 12);
-    meshList.push_back(object2);
+                bool currentBlockNotAir = blocks.at(x).at(y).at(z) != 0;
 
-    Mesh *object3 = new Mesh();
-    object3->CreateMesh(floorVertices, floorIndices, 32, 6);
-    meshList.push_back(object3);
+                // drawing top face
+                bool isBlockAboveAir;
+                try {
+                    isBlockAboveAir = blocks.at(x).at(y + 1).at(z) == 0;
+                } catch (const std::out_of_range& e) {
+                    isBlockAboveAir = y == chunkSizeY - 1;
+                }
+
+                if (currentBlockNotAir && isBlockAboveAir) {
+                    // drawing ceiling face
+                    indices.insert(indices.end(), {
+                            vertexProcessed, vertexProcessed + 1, vertexProcessed + 2,
+                            vertexProcessed + 3, vertexProcessed + 1, vertexProcessed + 2
+                    });
+
+                    vertices.insert(vertices.end(), {
+                            blockX,           blockY + 1.0f,     blockZ,           0.0f, 0.0f,		0.0f, 0.0f, 0.0f,
+                            blockX,           blockY + 1.0f,     blockZ + 1.0f,    1.0f, 0.0f,		0.0f, 0.0f, 0.0f,
+                            blockX + 1.0f,    blockY + 1.0f,     blockZ,           0.0f, 1.0f,		0.0f, 0.0f, 0.0f,
+                            blockX + 1.0f,    blockY + 1.0f,     blockZ + 1.0f,    1.0f, 1.0f,		0.0f, 0.0f, 0.0f,
+                    });
+                    vertexProcessed += 4;
+                }
+
+                // drawing front face
+                bool isBlockInFrontAir;
+                try {
+                    isBlockInFrontAir = blocks.at(x).at(y).at(z - 1) == 0;
+                } catch (const std::out_of_range& e) {
+                    isBlockInFrontAir = z == 0;
+                }
+
+                if (currentBlockNotAir && isBlockInFrontAir) {
+                    // drawing front face
+                    indices.insert(indices.end(), {
+                            vertexProcessed, vertexProcessed + 1, vertexProcessed + 2,
+                            vertexProcessed + 3, vertexProcessed + 1, vertexProcessed + 2
+                    });
+
+                    vertices.insert(vertices.end(), {
+                            blockX,           blockY,            blockZ,    0.0f, 0.0f,    0.0f, 0.0f, 0.0f,
+                            blockX + 1.0f,    blockY,            blockZ,    1.0f, 0.0f,    0.0f, 0.0f, 0.0f,
+                            blockX,           blockY + 1.0f,     blockZ,    0.0f, 1.0f,    0.0f, 0.0f, 0.0f,
+                            blockX + 1.0f,    blockY + 1.0f,     blockZ,    1.0f, 1.0f,    0.0f, 0.0f, 0.0f,
+                    });
+                    vertexProcessed += 4;
+                }
+
+                // drawing back face
+                bool isBlockInBackAir;
+                try {
+                    isBlockInBackAir = blocks.at(x).at(y).at(z + 1) == 0;
+                } catch (const std::out_of_range& e) {
+                    isBlockInBackAir = z == chunkSizeZ - 1;
+                }
+
+                if (currentBlockNotAir && isBlockInBackAir) {
+                    // drawing back face
+                    indices.insert(indices.end(), {
+                            vertexProcessed, vertexProcessed + 1, vertexProcessed + 2,
+                            vertexProcessed + 3, vertexProcessed + 1, vertexProcessed + 2
+                    });
+
+                    vertices.insert(vertices.end(), {
+                            blockX,           blockY,            blockZ + 1.0f,    0.0f, 0.0f,    0.0f, 0.0f, 0.0f,
+                            blockX + 1.0f,    blockY,            blockZ + 1.0f,    1.0f, 0.0f,    0.0f, 0.0f, 0.0f,
+                            blockX,           blockY + 1.0f,     blockZ + 1.0f,    0.0f, 1.0f,    0.0f, 0.0f, 0.0f,
+                            blockX + 1.0f,    blockY + 1.0f,     blockZ + 1.0f,    1.0f, 1.0f,    0.0f, 0.0f, 0.0f,
+                    });
+                    vertexProcessed += 4;
+                }
+
+                // drawing left face
+                bool isBlockOnLeftAir;
+                try {
+                    isBlockOnLeftAir = blocks.at(x - 1).at(y).at(z) == 0;
+                } catch (const std::out_of_range& e) {
+                    isBlockOnLeftAir = x == 0;
+                }
+
+                if (currentBlockNotAir && isBlockOnLeftAir) {
+                    // drawing left face
+                    indices.insert(indices.end(), {
+                            vertexProcessed, vertexProcessed + 1, vertexProcessed + 2,
+                            vertexProcessed + 3, vertexProcessed + 1, vertexProcessed + 2
+                    });
+
+                    vertices.insert(vertices.end(), {
+                            blockX,     blockY,            blockZ,            0.0f, 1.0f,    0.0f, 0.0f, 0.0f,
+                            blockX,     blockY + 1.0f,     blockZ,            1.0f, 1.0f,    0.0f, 0.0f, 0.0f,
+                            blockX,     blockY,            blockZ   + 1.0f,   0.0f, 0.0f,    0.0f, 0.0f, 0.0f,
+                            blockX,     blockY + 1.0f,     blockZ  + 1.0f,    0.0f, 1.0f,    0.0f, 0.0f, 0.0f,
+                    });
+                    vertexProcessed += 4;
+                }
+
+                // drawing right face
+                bool isBlockOnRightAir;
+                try {
+                    isBlockOnRightAir = blocks.at(x + 1).at(y).at(z) == 0;
+                } catch (const std::out_of_range& e) {
+                    isBlockOnRightAir = x == chunkSizeX - 1;
+                }
+
+                if (currentBlockNotAir && isBlockOnRightAir) {
+                    // drawing right face
+                    indices.insert(indices.end(), {
+                            vertexProcessed, vertexProcessed + 1, vertexProcessed + 2,
+                            vertexProcessed + 3, vertexProcessed + 1, vertexProcessed + 2
+                    });
+
+                    vertices.insert(vertices.end(), {
+                            blockX + 1.0f,     blockY,            blockZ,            0.0f, 1.0f,    0.0f, 0.0f, 0.0f,
+                            blockX + 1.0f,     blockY + 1.0f,     blockZ,            1.0f, 1.0f,    0.0f, 0.0f, 0.0f,
+                            blockX + 1.0f,     blockY,            blockZ   + 1.0f,   0.0f, 0.0f,    0.0f, 0.0f, 0.0f,
+                            blockX + 1.0f,     blockY + 1.0f,     blockZ  + 1.0f,    0.0f, 1.0f,    0.0f, 0.0f, 0.0f,
+                    });
+                    vertexProcessed += 4;
+                }
+
+                // drawing bottom face
+                bool isBlockBelowAir;
+                try {
+                    isBlockBelowAir = blocks.at(x).at(y - 1).at(z) == 0;
+                } catch (const std::out_of_range& e) {
+                    isBlockBelowAir = y == 0;
+                }
+
+                if (currentBlockNotAir && isBlockBelowAir) {
+                    indices.insert(indices.end(), {
+                            vertexProcessed, vertexProcessed + 1, vertexProcessed + 2,
+                            vertexProcessed + 3, vertexProcessed + 1, vertexProcessed + 2
+                    });
+
+                    vertices.insert(vertices.end(), {
+                            blockX,           blockY,     blockZ,           0.0f, 0.0f,		0.0f, 0.0f, 0.0f,
+                            blockX,           blockY,     blockZ + 1.0f,    1.0f, 0.0f,		0.0f, 0.0f, 0.0f,
+                            blockX + 1.0f,    blockY,     blockZ,           0.0f, 1.0f,		0.0f, 0.0f, 0.0f,
+                            blockX + 1.0f,    blockY,     blockZ + 1.0f,    1.0f, 1.0f,		0.0f, 0.0f, 0.0f,
+                    });
+                    vertexProcessed += 4;
+                }
+            }
+        }
+    }
+
+    if (vertices.empty() || indices.empty()) {
+        return;
+    }
+
+    Mesh *cube = new Mesh();
+    cube->CreateMesh(&vertices[0], &indices[0], vertices.size(), indices.size());
+    meshList.push_back(cube);
 }
+
+/*
+                printf("generating block at XYZ: %f, %f, %f \n", blockX, blockY, blockZ);
+
+                printf("vertex at: %f, %f, %f \n", blockX, blockY, blockZ);
+                printf("vertex at: %f, %f, %f \n", blockX, blockY, blockZ + 1.0f);
+                printf("vertex at: %f, %f, %f \n", blockX + 1.0f, blockY, blockZ);
+                printf("vertex at: %f, %f, %f \n", blockX + 1.0f, blockY, blockZ + 1.0f);
+
+                printf("indices: %i, %i, %i \n", offset, offset + 1, offset + 2);
+                printf("indices: %i, %i, %i \n", offset + 3, offset + 1, offset + 2);
+
+                printf("---------------------- \n");
+                */
 
 int main() {
     const unsigned int width = 1920, height = 1080;
@@ -127,7 +288,7 @@ int main() {
 
     auto* textSystem = new Text(width, height);
 
-    CreateObjects();
+    DrawChunk();
     CreateShader();
     camera = new Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 5.0f, 0.4f);
 
@@ -139,19 +300,19 @@ int main() {
     dirtTexture = Texture(dirtTexturePath.c_str());
     dirtTexture.LoadTextureAlpha();
 
+    /*
     std::string plainTexturePath = "textures/plain.png";
     plainTexture = Texture(plainTexturePath.c_str());
     plainTexture.LoadTextureAlpha();
+    */
 
-    /*
     shinyMaterial = Material(1.0f, 32);
     dullMaterial = Material(0.3f, 4);
 
     xwing = Model();
-    xwing.LoadModel("Models/x-wing.obj");
-    */
+    xwing.LoadModel("models/x-wing.obj");
 
-    mainLight = DirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.6f,glm::vec3(9.0f, -1.0f, -9.0f));
+    mainLight = DirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.6f,glm::vec3(9.0f, -1.0f, -9.0f));
 
     GLuint uniformModelId{}, uniformProjectionId{}, uniformView{}, uniformEyePosition{},
         uniformSpecularIntensity{}, uniformShininess{};
@@ -184,34 +345,24 @@ int main() {
 
         shaderList[0]->SetDirectionalLight(&mainLight);
 
+        glm::mat4 model(1.0f);
         glUniformMatrix4fv(uniformProjectionId, 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera->calculateViewMatrix()));
         glUniform3f(uniformEyePosition, camera->getCameraPosition().x, camera->getCameraPosition().y, camera->getCameraPosition().z);
 
-        glm::mat4 model(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f));
-        glUniformMatrix4fv(uniformModelId, 1, GL_FALSE, glm::value_ptr(model));
+        // start of objects rendering
 
-        brickTexture.UseTexture();
-        shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
-        meshList[0]->RenderMesh();
-
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(1.0f, 4.0f, -2.5f));
-        glUniformMatrix4fv(uniformModelId, 1, GL_FALSE, glm::value_ptr(model));
-        dirtTexture.UseTexture();
-        dullMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
-        meshList[1]->RenderMesh();
+        if (meshList.size() > 0) {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(0.0f, -5.0f, -5.0f));
+            glUniformMatrix4fv(uniformModelId, 1, GL_FALSE, glm::value_ptr(model));
+            brickTexture.UseTexture();
+            dullMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
+            meshList[0]->RenderMesh();
+        }
 
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
-        glUniformMatrix4fv(uniformModelId, 1, GL_FALSE, glm::value_ptr(model));
-        plainTexture.UseTexture();
-        dullMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
-        meshList[2]->RenderMesh();
-
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(-7.0f, 3.0f, 10.0f));
+        model = glm::translate(model, glm::vec3(-3.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(0.007f, 0.007f, 0.007f));
         glUniformMatrix4fv(uniformModelId, 1, GL_FALSE, glm::value_ptr(model));
         dullMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);

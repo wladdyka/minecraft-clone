@@ -76,10 +76,10 @@ void Window::handleKeys(GLFWwindow *window, int key, int code, int action, int m
     auto anyKey = key >= 0 && key < 1024;
     if (anyKey && action == GLFW_PRESS) {
         theWindow->keys[key] = true;
-        printf("Pressed: %s\n", glfwGetKeyName(key, 0));
+        // printf("Pressed: %s\n", glfwGetKeyName(key, 0));
     } else if (anyKey && action == GLFW_RELEASE) {
         theWindow->keys[key] = false;
-        printf("Release: %s\n", glfwGetKeyName(key, 0));
+        // printf("Release: %s\n", glfwGetKeyName(key, 0));
     }
 }
 

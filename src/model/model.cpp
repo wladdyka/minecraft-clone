@@ -41,10 +41,12 @@ void Model::LoadMaterials(const aiScene *scene) {
             }
         }
 
+        /*
         if (!textureList[i]) {
-            textureList[i] = new Texture("Texture/plain.png");
+            textureList[i] = new Texture("texture/plain.png");
             textureList[i]->LoadTextureAlpha();
         }
+        */
     }
 }
 
