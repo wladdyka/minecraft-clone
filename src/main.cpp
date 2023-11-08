@@ -79,9 +79,9 @@ void CalculateAverageNormals(unsigned int * indices, unsigned int indiceCount, G
 }
 
 void DrawChunk() {
-    constexpr int chunkSizeX = 3;
-    constexpr int chunkSizeY = 3;
-    constexpr int chunkSizeZ = 3;
+    constexpr int chunkSizeX = 10;
+    constexpr int chunkSizeY = 10;
+    constexpr int chunkSizeZ = 10;
 
     std::array<std::array<std::array<unsigned int, chunkSizeZ>, chunkSizeY>, chunkSizeX> blocks = {};
 
@@ -91,7 +91,6 @@ void DrawChunk() {
     int waterLevel = 3;
     // set block type here
     for (unsigned int x = 0; x < chunkSizeX; x++) {
-        // waterLevel--;
         for (unsigned int y = 0; y < chunkSizeY; y++) {
             for (unsigned int z = 0; z < chunkSizeZ; z++) {
                 blocks.at(x).at(y).at(z) = y <= waterLevel ? 1 : 0;
@@ -296,9 +295,9 @@ int main() {
     brickTexture = Texture(brickTexturePath.c_str());
     brickTexture.LoadTextureAlpha();
 
-    std::string dirtTexturePath = "textures/dirt.png";
+    std::string dirtTexturePath = "textures/dirt.jpg";
     dirtTexture = Texture(dirtTexturePath.c_str());
-    dirtTexture.LoadTextureAlpha();
+    dirtTexture.LoadTexture();
 
     /*
     std::string plainTexturePath = "textures/plain.png";
@@ -356,7 +355,7 @@ int main() {
             model = glm::mat4(1.0f);
             model = glm::translate(model, glm::vec3(0.0f, -5.0f, -5.0f));
             glUniformMatrix4fv(uniformModelId, 1, GL_FALSE, glm::value_ptr(model));
-            brickTexture.UseTexture();
+            dirtTexture.UseTexture();
             dullMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
             meshList[0]->RenderMesh();
         }
