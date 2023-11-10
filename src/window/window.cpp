@@ -18,6 +18,14 @@ int Window::Init() {
         return 1;
     }
 
+    int count;
+    int monitorX, monitorY;
+
+    GLFWmonitor** monitors = glfwGetMonitors(&count);
+    const GLFWvidmode* videoMode = glfwGetVideoMode(monitors[0]);
+
+    glfwGetMonitorPos(monitors[0], &monitorX, &monitorY);
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -29,6 +37,10 @@ int Window::Init() {
         glfwTerminate();
         return 1;
     }
+
+    glfwSetWindowPos(mainWindow,
+                     monitorX + (videoMode->width - width) / 2,
+                     monitorY + (videoMode->height - height) / 2);
 
     glfwGetFramebufferSize(mainWindow, &bufferWidth, &bufferHeight);
     glfwMakeContextCurrent(mainWindow);

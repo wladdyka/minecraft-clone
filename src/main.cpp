@@ -7,6 +7,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <assimp/importer.hpp>
+#include <noise/noise.h>
+#include <noise/noiseutils.h>
 #include <array>
 #include <stdexcept>
 
@@ -39,6 +41,10 @@ Model xwing;
 
 GLfloat deltaTime = 0.0f;
 GLfloat lastTime = 0.0f;
+
+constexpr int chunkSizeX = 32;
+constexpr int chunkSizeY = 64;
+constexpr int chunkSizeZ = 32;
 
 void CreateShader() {
     auto* generalShader = new Shader();
@@ -78,25 +84,33 @@ void CalculateAverageNormals(unsigned int * indices, unsigned int indiceCount, G
     }
 }
 
-void DrawChunk() {
-    constexpr int chunkSizeX = 10;
-    constexpr int chunkSizeY = 10;
-    constexpr int chunkSizeZ = 10;
-
+void DrawChunk(int chunkPosX, int chunkPosZ) {
     std::array<std::array<std::array<unsigned int, chunkSizeZ>, chunkSizeY>, chunkSizeX> blocks = {};
 
     std::vector<unsigned int> indices = {};
     std::vector<GLfloat> vertices = {};
 
-    int waterLevel = 3;
+    /* terrain generation part start */
+    noise::module::Perlin perlinModule;
+
+    perlinModule.SetSeed (0);
+    perlinModule.SetFrequency (48.0);
+    perlinModule.SetPersistence (0.5);
+    perlinModule.SetLacunarity (2.20703125);
+    perlinModule.SetOctaveCount (3);
+    perlinModule.SetNoiseQuality (QUALITY_STD);
+
     // set block type here
     for (unsigned int x = 0; x < chunkSizeX; x++) {
         for (unsigned int y = 0; y < chunkSizeY; y++) {
             for (unsigned int z = 0; z < chunkSizeZ; z++) {
-                blocks.at(x).at(y).at(z) = y <= waterLevel ? 1 : 0;
+                double groundLevel = perlinModule.GetValue(x, y, z) * chunkSizeY;
+                blocks.at(x).at(y).at(z) = y <= groundLevel ? 1 : 0;
             }
         }
     }
+
+    /* terrain generation part end */
 
     // figure out what vertices to add to a mesh
     unsigned int vertexProcessed = 0;
@@ -104,9 +118,9 @@ void DrawChunk() {
     for (unsigned int x = 0; x < chunkSizeX; x++) {
         for (unsigned int y = 0; y < chunkSizeY; y++) {
             for (unsigned int z = 0; z < chunkSizeZ; z++) {
-                auto blockX = (GLfloat)x;
+                auto blockX = (GLfloat)(x + (chunkPosX * chunkSizeX));
+                auto blockZ = (GLfloat)(z + (chunkPosZ * chunkSizeZ));
                 auto blockY = (GLfloat)y;
-                auto blockZ = (GLfloat)z;
 
                 bool currentBlockNotAir = blocks.at(x).at(y).at(z) != 0;
 
@@ -200,8 +214,8 @@ void DrawChunk() {
                     vertices.insert(vertices.end(), {
                             blockX,     blockY,            blockZ,            0.0f, 1.0f,    0.0f, 0.0f, 0.0f,
                             blockX,     blockY + 1.0f,     blockZ,            1.0f, 1.0f,    0.0f, 0.0f, 0.0f,
-                            blockX,     blockY,            blockZ   + 1.0f,   0.0f, 0.0f,    0.0f, 0.0f, 0.0f,
-                            blockX,     blockY + 1.0f,     blockZ  + 1.0f,    0.0f, 1.0f,    0.0f, 0.0f, 0.0f,
+                            blockX,     blockY,            blockZ + 1.0f,     0.0f, 0.0f,    0.0f, 0.0f, 0.0f,
+                            blockX,     blockY + 1.0f,     blockZ + 1.0f,     0.0f, 1.0f,    0.0f, 0.0f, 0.0f,
                     });
                     vertexProcessed += 4;
                 }
@@ -224,8 +238,8 @@ void DrawChunk() {
                     vertices.insert(vertices.end(), {
                             blockX + 1.0f,     blockY,            blockZ,            0.0f, 1.0f,    0.0f, 0.0f, 0.0f,
                             blockX + 1.0f,     blockY + 1.0f,     blockZ,            1.0f, 1.0f,    0.0f, 0.0f, 0.0f,
-                            blockX + 1.0f,     blockY,            blockZ   + 1.0f,   0.0f, 0.0f,    0.0f, 0.0f, 0.0f,
-                            blockX + 1.0f,     blockY + 1.0f,     blockZ  + 1.0f,    0.0f, 1.0f,    0.0f, 0.0f, 0.0f,
+                            blockX + 1.0f,     blockY,            blockZ + 1.0f,     0.0f, 0.0f,    0.0f, 0.0f, 0.0f,
+                            blockX + 1.0f,     blockY + 1.0f,     blockZ + 1.0f,     0.0f, 1.0f,    0.0f, 0.0f, 0.0f,
                     });
                     vertexProcessed += 4;
                 }
@@ -265,20 +279,6 @@ void DrawChunk() {
     meshList.push_back(cube);
 }
 
-/*
-                printf("generating block at XYZ: %f, %f, %f \n", blockX, blockY, blockZ);
-
-                printf("vertex at: %f, %f, %f \n", blockX, blockY, blockZ);
-                printf("vertex at: %f, %f, %f \n", blockX, blockY, blockZ + 1.0f);
-                printf("vertex at: %f, %f, %f \n", blockX + 1.0f, blockY, blockZ);
-                printf("vertex at: %f, %f, %f \n", blockX + 1.0f, blockY, blockZ + 1.0f);
-
-                printf("indices: %i, %i, %i \n", offset, offset + 1, offset + 2);
-                printf("indices: %i, %i, %i \n", offset + 3, offset + 1, offset + 2);
-
-                printf("---------------------- \n");
-                */
-
 int main() {
     const unsigned int width = 1920, height = 1080;
 
@@ -287,7 +287,20 @@ int main() {
 
     auto* textSystem = new Text(width, height);
 
-    DrawChunk();
+    /*
+    int chunksCountX = 1;
+    int chunksCountZ = 1;
+    for (int x = 0; x < chunksCountX; x++) {
+        for (int z = 0; z < chunksCountZ; z++) {
+            DrawChunk(x, z);
+        }
+    }
+    */
+
+    DrawChunk(0, 0);
+    DrawChunk(1, 0);
+    DrawChunk(-1, 0);
+
     CreateShader();
     camera = new Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 5.0f, 0.4f);
 

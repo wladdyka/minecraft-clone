@@ -14,6 +14,8 @@ find_package(glm CONFIG REQUIRED)
 find_package(freetype-gl CONFIG REQUIRED)
 find_package(Stb REQUIRED)
 find_package(assimp CONFIG REQUIRED)
+find_package(unofficial-noise CONFIG REQUIRED)
+find_package(unofficial-noiseutils CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} src/main.cpp src/mesh/mesh.cpp src/mesh/mesh.h src/shader/shader.cpp src/shader/shader.h src/window/window.cpp src/window/window.h src/camera/camera.cpp src/camera/camera.h src/text/text.cpp src/text/text.h src/texture/texture.cpp src/texture/texture.h src/light/light.cpp src/light/light.h src/material/material.cpp src/material/material.h src/light/directional-light.cpp src/light/directional-light.h src/common/common-values.h src/model/model.cpp src/model/model.h)
 
@@ -23,6 +25,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm)
 target_link_libraries(${PROJECT_NAME} PRIVATE freetype-gl)
 target_link_libraries(${PROJECT_NAME} PRIVATE assimp::assimp)
+target_link_libraries(${PROJECT_NAME} PRIVATE unofficial::noise::noise)
+target_link_libraries(${PROJECT_NAME} PRIVATE unofficial::noiseutils::noiseutils)
 target_include_directories(${PROJECT_NAME} PRIVATE ${Stb_INCLUDE_DIR})
 
 # post build copying of essential files
