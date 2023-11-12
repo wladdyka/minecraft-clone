@@ -28,7 +28,8 @@ std::vector<Mesh*> meshList;
 std::vector<Shader*> shaderList;
 Camera* camera;
 
-Texture brickTexture;
+Texture cobblestoneTexture;
+Texture stoneTexture;
 Texture dirtTexture;
 Texture plainTexture;
 
@@ -85,6 +86,8 @@ void CalculateAverageNormals(unsigned int * indices, unsigned int indiceCount, G
 }
 
 void DrawChunk(int chunkPosX, int chunkPosZ) {
+    //printf("drawing chunk x:%i z:%i\n", chunkPosX, chunkPosZ);
+
     std::array<std::array<std::array<unsigned int, chunkSizeZ>, chunkSizeY>, chunkSizeX> blocks = {};
 
     std::vector<unsigned int> indices = {};
@@ -93,19 +96,21 @@ void DrawChunk(int chunkPosX, int chunkPosZ) {
     /* terrain generation part start */
     noise::module::Perlin perlinModule;
 
-    perlinModule.SetSeed (0);
-    perlinModule.SetFrequency (48.0);
-    perlinModule.SetPersistence (0.5);
-    perlinModule.SetLacunarity (2.20703125);
-    perlinModule.SetOctaveCount (3);
-    perlinModule.SetNoiseQuality (QUALITY_STD);
+    perlinModule.SetSeed(0);
+    perlinModule.SetOctaveCount(2);
+    perlinModule.SetFrequency(0.1);
+    perlinModule.SetPersistence (1.0);
+    //perlinModule.SetLacunarity (2.20703125);
+    //perlinModule.SetNoiseQuality (QUALITY_STD);
+
+    double groundLevel = 30;
 
     // set block type here
     for (unsigned int x = 0; x < chunkSizeX; x++) {
         for (unsigned int y = 0; y < chunkSizeY; y++) {
             for (unsigned int z = 0; z < chunkSizeZ; z++) {
-                double groundLevel = perlinModule.GetValue(x, y, z) * chunkSizeY;
-                blocks.at(x).at(y).at(z) = y <= groundLevel ? 1 : 0;
+                double terrain = perlinModule.GetValue(x, 0, z) * 5;
+                blocks.at(x).at(y).at(z) = y <= terrain + groundLevel ? 1 : 0;
             }
         }
     }
@@ -115,12 +120,17 @@ void DrawChunk(int chunkPosX, int chunkPosZ) {
     // figure out what vertices to add to a mesh
     unsigned int vertexProcessed = 0;
 
+    unsigned int chunkOffsetX = chunkPosX * chunkSizeX;
+    unsigned int chunkOffsetZ = chunkPosZ * chunkSizeZ;
+
     for (unsigned int x = 0; x < chunkSizeX; x++) {
         for (unsigned int y = 0; y < chunkSizeY; y++) {
             for (unsigned int z = 0; z < chunkSizeZ; z++) {
-                auto blockX = (GLfloat)(x + (chunkPosX * chunkSizeX));
-                auto blockZ = (GLfloat)(z + (chunkPosZ * chunkSizeZ));
+                auto blockX = (GLfloat)(x + chunkOffsetX);
+                auto blockZ = (GLfloat)(z + chunkOffsetZ);
                 auto blockY = (GLfloat)y;
+
+                //printf("drawing block at x:%f y:%f z:%f\n", blockX, blockY, blockZ);
 
                 bool currentBlockNotAir = blocks.at(x).at(y).at(z) != 0;
 
@@ -277,6 +287,8 @@ void DrawChunk(int chunkPosX, int chunkPosZ) {
     Mesh *cube = new Mesh();
     cube->CreateMesh(&vertices[0], &indices[0], vertices.size(), indices.size());
     meshList.push_back(cube);
+
+    //printf("chunk drawn -----\n");
 }
 
 int main() {
@@ -287,26 +299,24 @@ int main() {
 
     auto* textSystem = new Text(width, height);
 
-    /*
-    int chunksCountX = 1;
-    int chunksCountZ = 1;
+    int chunksCountX = 2;
+    int chunksCountZ = 2;
     for (int x = 0; x < chunksCountX; x++) {
         for (int z = 0; z < chunksCountZ; z++) {
             DrawChunk(x, z);
         }
     }
-    */
-
-    DrawChunk(0, 0);
-    DrawChunk(1, 0);
-    DrawChunk(-1, 0);
 
     CreateShader();
-    camera = new Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 5.0f, 0.4f);
+    camera = new Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 20.0f, 0.4f);
 
-    std::string brickTexturePath = "textures/brick.png";
-    brickTexture = Texture(brickTexturePath.c_str());
-    brickTexture.LoadTextureAlpha();
+    std::string cobblestoneTexturePath = "textures/cobblestone.png";
+    cobblestoneTexture = Texture(cobblestoneTexturePath.c_str());
+    cobblestoneTexture.LoadTexture();
+
+    std::string stoneTexturePath = "textures/stone.jpg";
+    stoneTexture = Texture(stoneTexturePath.c_str());
+    stoneTexture.LoadTexture();
 
     std::string dirtTexturePath = "textures/dirt.jpg";
     dirtTexture = Texture(dirtTexturePath.c_str());
@@ -364,13 +374,13 @@ int main() {
 
         // start of objects rendering
 
-        if (meshList.size() > 0) {
+        for (auto & i : meshList) {
             model = glm::mat4(1.0f);
             model = glm::translate(model, glm::vec3(0.0f, -5.0f, -5.0f));
             glUniformMatrix4fv(uniformModelId, 1, GL_FALSE, glm::value_ptr(model));
-            dirtTexture.UseTexture();
+            stoneTexture.UseTexture();
             dullMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
-            meshList[0]->RenderMesh();
+            i->RenderMesh();
         }
 
         model = glm::mat4(1.0f);
