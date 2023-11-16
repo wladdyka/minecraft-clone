@@ -11,6 +11,7 @@
 #include <noise/noiseutils.h>
 #include <array>
 #include <stdexcept>
+#include <random>
 
 #include "mesh/mesh.h"
 #include "shader/shader.h"
@@ -96,9 +97,9 @@ void DrawChunk(int chunkPosX, int chunkPosZ) {
     /* terrain generation part start */
     noise::module::Perlin perlinModule;
 
-    perlinModule.SetSeed(0);
+    perlinModule.SetSeed(chunkPosX * 1000 + chunkPosZ);
     perlinModule.SetOctaveCount(2);
-    perlinModule.SetFrequency(0.1);
+    perlinModule.SetFrequency(0.02);
     perlinModule.SetPersistence (1.0);
     //perlinModule.SetLacunarity (2.20703125);
     //perlinModule.SetNoiseQuality (QUALITY_STD);
@@ -109,7 +110,7 @@ void DrawChunk(int chunkPosX, int chunkPosZ) {
     for (unsigned int x = 0; x < chunkSizeX; x++) {
         for (unsigned int y = 0; y < chunkSizeY; y++) {
             for (unsigned int z = 0; z < chunkSizeZ; z++) {
-                double terrain = perlinModule.GetValue(x, 0, z) * 5;
+                double terrain = perlinModule.GetValue(x, 0, z) * 10;
                 blocks.at(x).at(y).at(z) = y <= terrain + groundLevel ? 1 : 0;
             }
         }
@@ -150,10 +151,10 @@ void DrawChunk(int chunkPosX, int chunkPosZ) {
                     });
 
                     vertices.insert(vertices.end(), {
-                            blockX,           blockY + 1.0f,     blockZ,           0.0f, 0.0f,		0.0f, 0.0f, 0.0f,
-                            blockX,           blockY + 1.0f,     blockZ + 1.0f,    1.0f, 0.0f,		0.0f, 0.0f, 0.0f,
-                            blockX + 1.0f,    blockY + 1.0f,     blockZ,           0.0f, 1.0f,		0.0f, 0.0f, 0.0f,
-                            blockX + 1.0f,    blockY + 1.0f,     blockZ + 1.0f,    1.0f, 1.0f,		0.0f, 0.0f, 0.0f,
+                            blockX,           blockY + 1.0f,     blockZ,           0.0f, 0.0f,		0.0f, 1.0f, 0.0f,
+                            blockX,           blockY + 1.0f,     blockZ + 1.0f,    1.0f, 0.0f,		0.0f, 1.0f, 0.0f,
+                            blockX + 1.0f,    blockY + 1.0f,     blockZ,           0.0f, 1.0f,		0.0f, 1.0f, 0.0f,
+                            blockX + 1.0f,    blockY + 1.0f,     blockZ + 1.0f,    1.0f, 1.0f,		0.0f, 1.0f, 0.0f,
                     });
                     vertexProcessed += 4;
                 }
@@ -174,10 +175,10 @@ void DrawChunk(int chunkPosX, int chunkPosZ) {
                     });
 
                     vertices.insert(vertices.end(), {
-                            blockX,           blockY,            blockZ,    0.0f, 0.0f,    0.0f, 0.0f, 0.0f,
-                            blockX + 1.0f,    blockY,            blockZ,    1.0f, 0.0f,    0.0f, 0.0f, 0.0f,
-                            blockX,           blockY + 1.0f,     blockZ,    0.0f, 1.0f,    0.0f, 0.0f, 0.0f,
-                            blockX + 1.0f,    blockY + 1.0f,     blockZ,    1.0f, 1.0f,    0.0f, 0.0f, 0.0f,
+                            blockX,           blockY,            blockZ,    0.0f, 0.0f,    0.0f, 0.0f, -1.0f,
+                            blockX + 1.0f,    blockY,            blockZ,    1.0f, 0.0f,    0.0f, 0.0f, -1.0f,
+                            blockX,           blockY + 1.0f,     blockZ,    0.0f, 1.0f,    0.0f, 0.0f, -1.0f,
+                            blockX + 1.0f,    blockY + 1.0f,     blockZ,    1.0f, 1.0f,    0.0f, 0.0f, -1.0f,
                     });
                     vertexProcessed += 4;
                 }
@@ -198,10 +199,10 @@ void DrawChunk(int chunkPosX, int chunkPosZ) {
                     });
 
                     vertices.insert(vertices.end(), {
-                            blockX,           blockY,            blockZ + 1.0f,    0.0f, 0.0f,    0.0f, 0.0f, 0.0f,
-                            blockX + 1.0f,    blockY,            blockZ + 1.0f,    1.0f, 0.0f,    0.0f, 0.0f, 0.0f,
-                            blockX,           blockY + 1.0f,     blockZ + 1.0f,    0.0f, 1.0f,    0.0f, 0.0f, 0.0f,
-                            blockX + 1.0f,    blockY + 1.0f,     blockZ + 1.0f,    1.0f, 1.0f,    0.0f, 0.0f, 0.0f,
+                            blockX,           blockY,            blockZ + 1.0f,    0.0f, 0.0f,    0.0f, 0.0f, 1.0f,
+                            blockX + 1.0f,    blockY,            blockZ + 1.0f,    1.0f, 0.0f,    0.0f, 0.0f, 1.0f,
+                            blockX,           blockY + 1.0f,     blockZ + 1.0f,    0.0f, 1.0f,    0.0f, 0.0f, 1.0f,
+                            blockX + 1.0f,    blockY + 1.0f,     blockZ + 1.0f,    1.0f, 1.0f,    0.0f, 0.0f, 1.0f,
                     });
                     vertexProcessed += 4;
                 }
@@ -222,10 +223,10 @@ void DrawChunk(int chunkPosX, int chunkPosZ) {
                     });
 
                     vertices.insert(vertices.end(), {
-                            blockX,     blockY,            blockZ,            0.0f, 1.0f,    0.0f, 0.0f, 0.0f,
-                            blockX,     blockY + 1.0f,     blockZ,            1.0f, 1.0f,    0.0f, 0.0f, 0.0f,
-                            blockX,     blockY,            blockZ + 1.0f,     0.0f, 0.0f,    0.0f, 0.0f, 0.0f,
-                            blockX,     blockY + 1.0f,     blockZ + 1.0f,     0.0f, 1.0f,    0.0f, 0.0f, 0.0f,
+                            blockX,     blockY,            blockZ,            0.0f, 1.0f,    -1.0f, 0.0f, 0.0f,
+                            blockX,     blockY + 1.0f,     blockZ,            1.0f, 1.0f,    -1.0f, 0.0f, 0.0f,
+                            blockX,     blockY,            blockZ + 1.0f,     0.0f, 0.0f,    -1.0f, 0.0f, 0.0f,
+                            blockX,     blockY + 1.0f,     blockZ + 1.0f,     0.0f, 1.0f,    -1.0f, 0.0f, 0.0f,
                     });
                     vertexProcessed += 4;
                 }
@@ -246,10 +247,10 @@ void DrawChunk(int chunkPosX, int chunkPosZ) {
                     });
 
                     vertices.insert(vertices.end(), {
-                            blockX + 1.0f,     blockY,            blockZ,            0.0f, 1.0f,    0.0f, 0.0f, 0.0f,
-                            blockX + 1.0f,     blockY + 1.0f,     blockZ,            1.0f, 1.0f,    0.0f, 0.0f, 0.0f,
-                            blockX + 1.0f,     blockY,            blockZ + 1.0f,     0.0f, 0.0f,    0.0f, 0.0f, 0.0f,
-                            blockX + 1.0f,     blockY + 1.0f,     blockZ + 1.0f,     0.0f, 1.0f,    0.0f, 0.0f, 0.0f,
+                            blockX + 1.0f,     blockY,            blockZ,            0.0f, 1.0f,    1.0f, 0.0f, 0.0f,
+                            blockX + 1.0f,     blockY + 1.0f,     blockZ,            1.0f, 1.0f,    1.0f, 0.0f, 0.0f,
+                            blockX + 1.0f,     blockY,            blockZ + 1.0f,     0.0f, 0.0f,    1.0f, 0.0f, 0.0f,
+                            blockX + 1.0f,     blockY + 1.0f,     blockZ + 1.0f,     0.0f, 1.0f,    1.0f, 0.0f, 0.0f,
                     });
                     vertexProcessed += 4;
                 }
@@ -269,10 +270,10 @@ void DrawChunk(int chunkPosX, int chunkPosZ) {
                     });
 
                     vertices.insert(vertices.end(), {
-                            blockX,           blockY,     blockZ,           0.0f, 0.0f,		0.0f, 0.0f, 0.0f,
-                            blockX,           blockY,     blockZ + 1.0f,    1.0f, 0.0f,		0.0f, 0.0f, 0.0f,
-                            blockX + 1.0f,    blockY,     blockZ,           0.0f, 1.0f,		0.0f, 0.0f, 0.0f,
-                            blockX + 1.0f,    blockY,     blockZ + 1.0f,    1.0f, 1.0f,		0.0f, 0.0f, 0.0f,
+                            blockX,           blockY,     blockZ,           0.0f, 0.0f,		0.0f, -1.0f, 0.0f,
+                            blockX,           blockY,     blockZ + 1.0f,    1.0f, 0.0f,		0.0f, -1.0f, 0.0f,
+                            blockX + 1.0f,    blockY,     blockZ,           0.0f, 1.0f,		0.0f, -1.0f, 0.0f,
+                            blockX + 1.0f,    blockY,     blockZ + 1.0f,    1.0f, 1.0f,		0.0f, -1.0f, 0.0f,
                     });
                     vertexProcessed += 4;
                 }
@@ -299,8 +300,8 @@ int main() {
 
     auto* textSystem = new Text(width, height);
 
-    int chunksCountX = 2;
-    int chunksCountZ = 2;
+    int chunksCountX = 4;
+    int chunksCountZ = 4;
     for (int x = 0; x < chunksCountX; x++) {
         for (int z = 0; z < chunksCountZ; z++) {
             DrawChunk(x, z);
